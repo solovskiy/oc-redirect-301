@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>301 Redirect from DB</name>
+    <code>redirect301</code>
+    <version>1.0.0</version>
+    <author>Custom</author>
+    <link></link>
+
+    <!--
+        Патчим startup/router.php — вставляем вызов нашего контроллера
+        в самом начале index(), до любой обработки роута.
+        Это надёжнее чем event, т.к. events на startup в OC 3.x ненадёжны.
+    -->
+    <file path="catalog/controller/startup/router.php">
+        <operation>
+            <search><![CDATA[public function index() {]]></search>
+            <add position="after"><![CDATA[
+		// === 301 Redirect from DB ===
+		$this->load->controller('extension/module/redirect301');
+		// ============================
+]]></add>
+        </operation>
+    </file>
+</modification>
