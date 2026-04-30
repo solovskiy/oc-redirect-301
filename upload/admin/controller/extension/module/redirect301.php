@@ -315,6 +315,13 @@ class ControllerExtensionModuleRedirect301 extends Controller {
             $this->error['date_end'] = $this->language->get('error_date_range');
         }
 
+        // Проверка: from_url не должен совпадать с to_url
+        if (!isset($this->error['from_url']) && !isset($this->error['to_url'])) {
+            if ($from_url !== '' && $to_url !== '' && rtrim($from_url, '/') === rtrim($to_url, '/')) {
+                $this->error['to_url'] = $this->language->get('error_self_redirect');
+            }
+        }
+
         // Уникальность from_url
         if (!isset($this->error['from_url'])) {
             $exclude = isset($this->request->get['redirect_id']) ? (int)$this->request->get['redirect_id'] : 0;

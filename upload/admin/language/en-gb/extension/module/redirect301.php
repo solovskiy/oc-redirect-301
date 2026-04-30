@@ -55,6 +55,7 @@ $_['error_warning']        = 'Warning: Please check the form carefully for error
 $_['error_permission']     = 'Warning: You do not have permission to modify redirects!';
 $_['error_from_url']       = '"From URL" is required (1-1000 chars)!';
 $_['error_from_url_exists']= 'A redirect with this "From URL" already exists (id %d).';
+$_['error_self_redirect']  = '"From URL" and "To URL" are the same — self-redirect is not allowed!';
 $_['error_to_url']         = 'Either "To URL" or a Product must be set!';
 $_['error_response_code']  = 'Invalid HTTP code. Allowed: 301, 302, 303, 307, 308.';
 $_['error_date']           = 'Invalid date format (expected YYYY-MM-DD).';
