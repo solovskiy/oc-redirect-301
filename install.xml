@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <modification>
-    <name>301 Redirect from DB</name>
+    <name>301 Redirect from DB (oc_redirect)</name>
     <code>redirect301</code>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <author>Custom</author>
     <link></link>
 
     <!--
-        Патчим startup/router.php — вставляем вызов нашего контроллера
-        в самом начале index(), до любой обработки роута.
-        Это надёжнее чем event, т.к. events на startup в OC 3.x ненадёжны.
+        Подцепляемся к startup-роутеру catalog-стороны: вызываем наш контроллер
+        в самом начале index() — до обработки роута.
     -->
     <file path="catalog/controller/startup/router.php">
         <operation>
             <search><![CDATA[public function index() {]]></search>
             <add position="after"><![CDATA[
-		// === 301 Redirect from DB ===
+		// === 301 Redirect from DB (oc_redirect) ===
 		$this->load->controller('extension/module/redirect301');
-		// ============================
+		// ==========================================
+]]></add>
+        </operation>
+    </file>
+
+    <!--
+        Логируем 404: вызываем наш метод в контроллере ошибки.
+    -->
+    <file path="catalog/controller/error/not_found.php">
+        <operation>
+            <search><![CDATA[public function index() {]]></search>
+            <add position="after"><![CDATA[
+		// === 301 Redirect — log 404 ===
+		$this->load->controller('extension/module/redirect301/log404');
+		// ==============================
 ]]></add>
         </operation>
     </file>
