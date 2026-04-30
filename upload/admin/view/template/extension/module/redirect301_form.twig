@@ -20,53 +20,141 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
+
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
       </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-redirect" class="form-horizontal">
+
           <div class="form-group required">
-            <label class="col-sm-2 control-label" for="input-from-url">{{ entry_from_url }}</label>
+            <label class="col-sm-2 control-label" for="input-from-url">
+              <span data-toggle="tooltip" title="{{ help_from_url }}">{{ entry_from_url }}</span>
+            </label>
             <div class="col-sm-10">
-              <input type="text" name="from_url" value="{{ from_url }}" placeholder="{{ entry_from_url }}" id="input-from-url" class="form-control" />
-              {% if error_from_url %}
-              <div class="text-danger">{{ error_from_url }}</div>
-              {% endif %}
+              <input type="text" name="from_url" value="{{ from_url }}" placeholder="/old-page" id="input-from-url" class="form-control" />
+              {% if error_from_url %}<div class="text-danger">{{ error_from_url }}</div>{% endif %}
             </div>
           </div>
-          <div class="form-group required">
-            <label class="col-sm-2 control-label" for="input-to-url">{{ entry_to_url }}</label>
-            <div class="col-sm-10">
-              <input type="text" name="to_url" value="{{ to_url }}" placeholder="{{ entry_to_url }}" id="input-to-url" class="form-control" />
-              {% if error_to_url %}
-              <div class="text-danger">{{ error_to_url }}</div>
-              {% endif %}
-            </div>
-          </div>
+
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <label class="col-sm-2 control-label" for="input-to-url">
+              <span data-toggle="tooltip" title="{{ help_to_url }}">{{ entry_to_url }}</span>
+            </label>
             <div class="col-sm-10">
-              <select name="status" id="input-status" class="form-control">
-                {% if status %}
-                <option value="1" selected="selected">{{ text_enabled }}</option>
-                <option value="0">{{ text_disabled }}</option>
-                {% else %}
-                <option value="1">{{ text_enabled }}</option>
-                <option value="0" selected="selected">{{ text_disabled }}</option>
-                {% endif %}
+              <input type="text" name="to_url" value="{{ to_url }}" placeholder="/new-page" id="input-to-url" class="form-control" />
+              {% if error_to_url %}<div class="text-danger">{{ error_to_url }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-product">
+              <span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span>
+            </label>
+            <div class="col-sm-10">
+              <input type="text" name="product" value="{{ product }}" placeholder="{{ entry_product }}" id="input-product" class="form-control" autocomplete="off" />
+              <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id" />
+              {% if error_product_id %}<div class="text-danger">{{ error_product_id }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-response-code">{{ entry_response_code }}</label>
+            <div class="col-sm-10">
+              <select name="response_code" id="input-response-code" class="form-control">
+                {% for code in response_codes %}
+                <option value="{{ code.value }}"{% if code.value == response_code %} selected="selected"{% endif %}>{{ code.text }}</option>
+                {% endfor %}
+              </select>
+              {% if error_response_code %}<div class="text-danger">{{ error_response_code }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-date-start">{{ entry_date_start }}</label>
+            <div class="col-sm-10">
+              <div class="input-group date">
+                <input type="text" name="date_start" value="{{ date_start }}" placeholder="YYYY-MM-DD" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                </span>
+              </div>
+              {% if error_date_start %}<div class="text-danger">{{ error_date_start }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-date-end">{{ entry_date_end }}</label>
+            <div class="col-sm-10">
+              <div class="input-group date">
+                <input type="text" name="date_end" value="{{ date_end }}" placeholder="YYYY-MM-DD" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                </span>
+              </div>
+              {% if error_date_end %}<div class="text-danger">{{ error_date_end }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-active">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="active" id="input-active" class="form-control">
+                <option value="1"{% if active %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                <option value="0"{% if not active %} selected="selected"{% endif %}>{{ text_disabled }}</option>
               </select>
             </div>
           </div>
+
+          {% if times_used > 0 %}
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+            <label class="col-sm-2 control-label">{{ entry_times_used }}</label>
             <div class="col-sm-10">
-              <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+              <p class="form-control-static">{{ times_used }}</p>
             </div>
           </div>
+          {% endif %}
+
         </form>
       </div>
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+// Datepicker для дат (стандартный bootstrap datetimepicker, идущий с OC 3.x)
+$('.date').datetimepicker({
+    pickTime: false
+});
+
+// Autocomplete для товара
+$('input[name=\'product\']').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['product_id']
+                    };
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('input[name=\'product\']').val(item['label']);
+        $('input[name=\'product_id\']').val(item['value']);
+    }
+});
+
+// Если очищают поле — обнуляем product_id
+$('input[name=\'product\']').on('input', function() {
+    if ($(this).val() === '') {
+        $('input[name=\'product_id\']').val('');
+    }
+});
+</script>
 {{ footer }}

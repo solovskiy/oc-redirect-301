@@ -3,9 +3,9 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="pull-right">
-        <button type="button" data-toggle="tooltip" title="{{ button_add }}" onclick="confirm('{{ button_add }}') ? $('#form-redirect').submit() : false;" class="btn btn-primary" disabled="disabled"><i class="fa fa-plus"></i></button>
+        <a href="{{ log404_url }}" data-toggle="tooltip" title="{{ button_log404 }}" class="btn btn-warning"><i class="fa fa-exclamation-triangle"></i> {{ button_log404 }}</a>
         <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
-        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" onclick="confirm('{{ button_delete }}') ? $('#form-redirect').submit() : false;" class="btn btn-danger" disabled="disabled"><i class="fa fa-trash-o"></i></button>
+        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" onclick="confirm('{{ text_confirm_delete }}') ? $('#form-redirect').submit() : false;" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
       </div>
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
@@ -26,6 +26,42 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-filter"></i> {{ text_filter }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label class="control-label" for="input-filter-from-url">{{ entry_from_url }}</label>
+              <input type="text" name="filter_from_url" value="{{ filter_from_url }}" placeholder="{{ entry_from_url }}" id="input-filter-from-url" class="form-control" />
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label class="control-label" for="input-filter-to-url">{{ entry_to_url }}</label>
+              <input type="text" name="filter_to_url" value="{{ filter_to_url }}" placeholder="{{ entry_to_url }}" id="input-filter-to-url" class="form-control" />
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label class="control-label" for="input-filter-active">{{ entry_status }}</label>
+              <select name="filter_active" id="input-filter-active" class="form-control">
+                <option value=""{% if filter_active == '' %} selected="selected"{% endif %}>{{ text_all }}</option>
+                <option value="1"{% if filter_active == '1' %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                <option value="0"{% if filter_active == '0' %} selected="selected"{% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="text-right">
+          <button type="button" id="button-filter" class="btn btn-primary"><i class="fa fa-search"></i> {{ button_filter }}</button>
+        </div>
+      </div>
+    </div>
+
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
@@ -39,8 +75,11 @@
                   <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
                   <td class="text-left"><a href="{{ sort_from_url }}"{% if sort == 'from_url' %} class="{{ order|lower }}"{% endif %}>{{ column_from_url }}</a></td>
                   <td class="text-left"><a href="{{ sort_to_url }}"{% if sort == 'to_url' %} class="{{ order|lower }}"{% endif %}>{{ column_to_url }}</a></td>
-                  <td class="text-left"><a href="{{ sort_status }}"{% if sort == 'status' %} class="{{ order|lower }}"{% endif %}>{{ column_status }}</a></td>
-                  <td class="text-right"><a href="{{ sort_sort_order }}"{% if sort == 'sort_order' %} class="{{ order|lower }}"{% endif %}>{{ column_sort_order }}</a></td>
+                  <td class="text-center"><a href="{{ sort_response_code }}"{% if sort == 'response_code' %} class="{{ order|lower }}"{% endif %}>{{ column_response_code }}</a></td>
+                  <td class="text-center"><a href="{{ sort_active }}"{% if sort == 'active' %} class="{{ order|lower }}"{% endif %}>{{ column_status }}</a></td>
+                  <td class="text-center"><a href="{{ sort_date_start }}"{% if sort == 'date_start' %} class="{{ order|lower }}"{% endif %}>{{ column_date_start }}</a></td>
+                  <td class="text-center"><a href="{{ sort_date_end }}"{% if sort == 'date_end' %} class="{{ order|lower }}"{% endif %}>{{ column_date_end }}</a></td>
+                  <td class="text-right"><a href="{{ sort_times_used }}"{% if sort == 'times_used' %} class="{{ order|lower }}"{% endif %}>{{ column_times_used }}</a></td>
                   <td class="text-right">{{ column_action }}</td>
                 </tr>
               </thead>
@@ -48,17 +87,38 @@
                 {% if redirects %}
                 {% for redirect in redirects %}
                 <tr>
-                  <td class="text-center">{% if redirect.id in selected %}<input type="checkbox" name="selected[]" value="{{ redirect.id }}" checked="checked" />{% else %}<input type="checkbox" name="selected[]" value="{{ redirect.id }}" />{% endif %}</td>
+                  <td class="text-center">
+                    {% if redirect.redirect_id in selected %}
+                      <input type="checkbox" name="selected[]" value="{{ redirect.redirect_id }}" checked="checked" />
+                    {% else %}
+                      <input type="checkbox" name="selected[]" value="{{ redirect.redirect_id }}" />
+                    {% endif %}
+                  </td>
                   <td class="text-left">{{ redirect.from_url }}</td>
-                  <td class="text-left">{{ redirect.to_url }}</td>
-                  <td class="text-left">{{ redirect.status }}</td>
-                  <td class="text-right">{{ redirect.sort_order }}</td>
-                  <td class="text-right"><a href="{{ redirect.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                  <td class="text-left">
+                    {% if redirect.to_url %}{{ redirect.to_url }}{% endif %}
+                    {% if redirect.product_id %}<span class="label label-info">product #{{ redirect.product_id }}</span>{% endif %}
+                  </td>
+                  <td class="text-center">{{ redirect.response_code }}</td>
+                  <td class="text-center">
+                    {% if redirect.active %}
+                      <span class="label label-success">{{ text_enabled }}</span>
+                    {% else %}
+                      <span class="label label-default">{{ text_disabled }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">{{ redirect.date_start }}</td>
+                  <td class="text-center">{{ redirect.date_end }}</td>
+                  <td class="text-right">{{ redirect.times_used }}</td>
+                  <td class="text-right">
+                    <a href="{{ redirect.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+                    <a href="{{ redirect.reset }}" data-toggle="tooltip" title="{{ button_reset }}" class="btn btn-warning" onclick="return confirm('{{ text_confirm_reset }}');"><i class="fa fa-refresh"></i></a>
+                  </td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                  <td class="text-center" colspan="6">{{ text_no_results }}</td>
+                  <td class="text-center" colspan="9">{{ text_no_results }}</td>
                 </tr>
                 {% endif %}
               </tbody>
@@ -73,4 +133,23 @@
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+$('#button-filter').on('click', function () {
+    var url = 'index.php?route=extension/module/redirect301&user_token={{ user_token }}';
+    var filter_from_url = $('input[name=\'filter_from_url\']').val();
+    var filter_to_url   = $('input[name=\'filter_to_url\']').val();
+    var filter_active   = $('select[name=\'filter_active\']').val();
+
+    if (filter_from_url) { url += '&filter_from_url=' + encodeURIComponent(filter_from_url); }
+    if (filter_to_url)   { url += '&filter_to_url='   + encodeURIComponent(filter_to_url); }
+    if (filter_active !== '') { url += '&filter_active=' + encodeURIComponent(filter_active); }
+
+    location = url;
+});
+
+$('#input-filter-from-url, #input-filter-to-url').on('keydown', function (e) {
+    if (e.keyCode == 13) { $('#button-filter').trigger('click'); }
+});
+</script>
 {{ footer }}

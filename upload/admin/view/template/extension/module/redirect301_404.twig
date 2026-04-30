@@ -1,0 +1,125 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <a href="{{ back_url }}" class="btn btn-default"><i class="fa fa-arrow-left"></i> {{ button_back }}</a>
+        <a href="{{ clear_url }}" class="btn btn-danger" onclick="return confirm('{{ text_confirm_clear }}');"><i class="fa fa-trash-o"></i> {{ button_clear }}</a>
+        <button type="button" onclick="confirm('{{ text_confirm_delete }}') ? $('#form-404').submit() : false;" class="btn btn-warning"><i class="fa fa-times"></i> {{ button_delete_selected }}</button>
+      </div>
+      <h1>{{ heading_title_404 }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-search"></i> {{ text_filter }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <input type="text" id="input-filter-url" value="{{ filter_url }}" placeholder="{{ column_404_url }}" class="form-control" />
+          </div>
+          <div class="col-sm-2">
+            <button type="button" id="button-filter" class="btn btn-primary"><i class="fa fa-search"></i> {{ button_filter }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> {{ heading_title_404 }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ delete_url }}" method="post" id="form-404">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <td style="width:1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-left"><a href="{{ sort_url }}"{% if sort == 'url' %} class="{{ order|lower }}"{% endif %}>{{ column_404_url }}</a></td>
+                  <td class="text-left">{{ column_404_referer }}</td>
+                  <td class="text-center">{{ column_404_ip }}</td>
+                  <td class="text-left">{{ column_404_ua }}</td>
+                  <td class="text-center"><a href="{{ sort_hits }}"{% if sort == 'hits' %} class="{{ order|lower }}"{% endif %}>{{ column_404_hits }}</a></td>
+                  <td class="text-center"><a href="{{ sort_first_seen }}"{% if sort == 'first_seen' %} class="{{ order|lower }}"{% endif %}>{{ column_404_first_seen }}</a></td>
+                  <td class="text-center"><a href="{{ sort_last_seen }}"{% if sort == 'last_seen' %} class="{{ order|lower }}"{% endif %}>{{ column_404_last_seen }}</a></td>
+                  <td class="text-right">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% if entries %}
+                {% for entry in entries %}
+                <tr>
+                  <td class="text-center">
+                    {% if entry.id in selected %}<input type="checkbox" name="selected[]" value="{{ entry.id }}" checked="checked" />
+                    {% else %}<input type="checkbox" name="selected[]" value="{{ entry.id }}" />{% endif %}
+                  </td>
+                  <td class="text-left" style="max-width:300px;word-break:break-all;">
+                    {{ entry.url }}
+                    {% if entry.existing_redirect_id %}
+                      <span class="label label-info" title="{{ text_redirect_exists }} #{{ entry.existing_redirect_id }}">#{{ entry.existing_redirect_id }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-left" style="max-width:180px;word-break:break-all;">
+                    <span title="{{ entry.referer }}">{{ entry.referer|slice(0, 50) }}{% if entry.referer|length > 50 %}…{% endif %}</span>
+                  </td>
+                  <td class="text-center" style="white-space:nowrap;">{{ entry.ip }}</td>
+                  <td class="text-left" style="max-width:160px;word-break:break-all;">
+                    <span title="{{ entry.user_agent }}">{{ entry.user_agent|slice(0, 40) }}{% if entry.user_agent|length > 40 %}…{% endif %}</span>
+                  </td>
+                  <td class="text-center"><span class="label label-{% if entry.hits > 50 %}danger{% elseif entry.hits > 10 %}warning{% else %}default{% endif %}">{{ entry.hits }}</span></td>
+                  <td class="text-center">{{ entry.first_seen }}</td>
+                  <td class="text-center">{{ entry.last_seen }}</td>
+                  <td class="text-right" style="white-space:nowrap;">
+                    <a href="{{ entry.action_link }}" data-toggle="tooltip" title="{{ entry.action_label }}" class="btn {{ entry.action_class }} btn-xs"><i class="fa {{ entry.action_icon }}"></i> {{ entry.action_label }}</a>
+                  </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td class="text-center" colspan="9">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$('#button-filter').on('click', function () {
+    var url = 'index.php?route=extension/module/redirect301/log404&user_token={{ user_token }}';
+    var filter_url = $('#input-filter-url').val();
+    if (filter_url) { url += '&filter_url=' + encodeURIComponent(filter_url); }
+    location = url;
+});
+$('#input-filter-url').on('keydown', function (e) {
+    if (e.keyCode == 13) { $('#button-filter').trigger('click'); }
+});
+</script>
+{{ footer }}
